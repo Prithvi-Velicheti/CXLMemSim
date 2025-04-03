@@ -9,31 +9,57 @@ endif ()
 execute_process(COMMAND uname -r OUTPUT_VARIABLE arch OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(LINUX_SOURCE /lib/modules/${arch}/build/)
 
-set(CMAKE_CXX_STANDARD 26)
+set(CMAKE_CXX_STANDARD 20)
+
+# Forcibly link to pthread library
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+find_package(Threads REQUIRED)
+
 add_subdirectory(lib/bpftime)
 add_subdirectory(microbench)
 #add_subdirectory(workloads)
 
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
 
-find_package(cxxopts REQUIRED)
+# Handle cxxopts - either find it externally or fetch/build it
+find_package(cxxopts QUIET)
+if(NOT cxxopts_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+        cxxopts
+        GIT_REPOSITORY https://github.com/jarro2783/cxxopts.git
+        GIT_TAG v3.1.1
+    )
+    FetchContent_MakeAvailable(cxxopts)
+endif()
+
 #find_package(spdlog REQUIRED)
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
 
 execute_process(COMMAND uname -r OUTPUT_VARIABLE arch OUTPUT_STRIP_TRAILING_WHITESPACE)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC -pthread")
-set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -latomic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -latomic -pthread")
 
 add_executable(CXLMemSim ${SOURCE_FILES} src/main.cc)
 
-include_directories(CXLMemSim include ${cxxopts_INCLUDE_DIR} ${spdlog_INCLUDE_DIR} ${runtime_SOURCE_DIR}/include)
-target_link_libraries(CXLMemSim cxxopts::cxxopts bpftime_vm bpftime-object bpftime_base_attach_impl bpftime-agent )
+include_directories(CXLMemSim include ${runtime_SOURCE_DIR}/include)
+if(TARGET cxxopts::cxxopts)
+    target_link_libraries(CXLMemSim cxxopts::cxxopts)
+else()
+    target_link_libraries(CXLMemSim cxxopts)
+endif()
+target_link_libraries(CXLMemSim bpftime_vm bpftime-object bpftime_base_attach_impl bpftime-agent ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(CXLMemSimRoB ${SOURCE_FILES} src/rob.cc)
 
-include_directories(CXLMemSimRoB include ${cxxopts_INCLUDE_DIR} ${spdlog_INCLUDE_DIR} ${runtime_SOURCE_DIR}/include)
-target_link_libraries(CXLMemSimRoB cxxopts::cxxopts bpftime_vm bpftime-object bpftime_base_attach_impl bpftime-agent)
-
+include_directories(CXLMemSimRoB include ${runtime_SOURCE_DIR}/include)
+if(TARGET cxxopts::cxxopts)
+    target_link_libraries(CXLMemSimRoB cxxopts::cxxopts)
+else()
+    target_link_libraries(CXLMemSimRoB cxxopts)
+endif()
+target_link_libraries(CXLMemSimRoB bpftime_vm bpftime-object bpftime_base_attach_impl bpftime-agent ${CMAKE_THREAD_LIBS_INIT})
 
 function(bpf prefix)
     add_custom_target(${prefix}_bpf ALL
