@@ -15,7 +15,8 @@
 	url = https://github.com/jina-ai/vectordb
 [submodule "lib/bpftime"]
 	path = lib/bpftime
-	url = https://github.com/victoryang00/bpftime
+	url = https://github.com/Prithvi-Velicheti/bpftime.git
+	branch = bpftime-fix
 [submodule "workloads/llama.cpp"]
 	path = workloads/llama.cpp
 	url = https://github.com/ggml-org/llama.cpp
