@@ -4,6 +4,10 @@ add_executable(mmap_write mmap_write.c)
 add_executable(malloc malloc.c)
 add_executable(sbrk sbrk.c)
 
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+find_package(Threads REQUIRED)
+
 add_executable(ld_simple ld_simple.cpp)
 add_executable(nt-ld nt-ld.cpp)
 add_executable(nt-st nt-st.cpp)
@@ -12,6 +16,7 @@ add_executable(branch_simple branch_simple.c)
 add_executable(cache-thrash cache-thrash.c)
 add_executable(cache-miss cache-miss.c)
 add_executable(thread thread.cpp)
+target_link_libraries(thread Threads::Threads)
 
 add_executable(ld1 ld.cpp)
 target_compile_definitions(ld1 PRIVATE -DFENCE_COUNT=1)

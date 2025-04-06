@@ -305,34 +305,34 @@ void sizebw_load(char *start_addr, long size, long count, long *rand_seed, long 
                  "xor %%r8, %%r8 \n" /* r8: access offset */
                  "xor %%r11, %%r11 \n" /* r11: access counter */
                  // 1
-                 "LOOP_FRNG_SIZEBWL_RLOOP: \n" /* outer (counter) loop */
+                 "1: \n" /* outer (counter) loop */
                  RandLFSR64 /* LFSR: uses r9, r12 (reusable), rcx (above), fill r8 */
                  "lea (%[start_addr], %%r8), %%r9 \n"
                  "xor %%r10, %%r10 \n" /* r10: accessed size */
-                 "LOOP_FRNG_SIZEBWL_ONE1: \n" /* inner (access) loop, unroll 8 times */
+                 "2: \n" /* inner (access) loop, unroll 8 times */
                  SIZEBTLD_MACRO /* Access: uses r8[rand_base], r10[size_accessed], r9 */
                  "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_FRNG_SIZEBWL_ONE1 \n" SIZEBTLD_FENCE
+                 "jl 2b \n" SIZEBTLD_FENCE
 
                      // 2
                      RandLFSR64 "lea (%[start_addr], %%r8), %%r9 \n"
                  "xor %%r10, %%r10 \n"
-                 "LOOP_FRNG_SIZEBWL_ONE2: \n" SIZEBTLD_MACRO "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_FRNG_SIZEBWL_ONE2 \n" SIZEBTLD_FENCE
+                 "3: \n" SIZEBTLD_MACRO "cmp %[accesssize], %%r10 \n"
+                 "jl 3b \n" SIZEBTLD_FENCE
                      // 3
                      RandLFSR64 "lea (%[start_addr], %%r8), %%r9 \n"
                  "xor %%r10, %%r10 \n"
-                 "LOOP_FRNG_SIZEBWL_ONE3: \n" SIZEBTLD_MACRO "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_FRNG_SIZEBWL_ONE3 \n" SIZEBTLD_FENCE
+                 "4: \n" SIZEBTLD_MACRO "cmp %[accesssize], %%r10 \n"
+                 "jl 4b \n" SIZEBTLD_FENCE
                      // 4
                      RandLFSR64 "lea (%[start_addr], %%r8), %%r9 \n"
                  "xor %%r10, %%r10 \n"
-                 "LOOP_FRNG_SIZEBWL_ONE4: \n" SIZEBTLD_MACRO "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_FRNG_SIZEBWL_ONE4 \n" SIZEBTLD_FENCE
+                 "5: \n" SIZEBTLD_MACRO "cmp %[accesssize], %%r10 \n"
+                 "jl 5b \n" SIZEBTLD_FENCE
 
                  "add $4, %%r11 \n"
                  "cmp %[count], %%r11\n"
-                 "jl LOOP_FRNG_SIZEBWL_RLOOP \n"
+                 "jl 1b \n"
 
                  : [random] "=r"(rand_seed)
                  : [start_addr] "r"(start_addr), [accesssize] "r"(size), [count] "r"(count),
@@ -402,30 +402,30 @@ void sizebw_nt(char *start_addr, long size, long count, long *rand_seed, long ac
                  "xor %%r11, %%r11 \n"
                  "movq %[start_addr], %%xmm0 \n" /* zmm0: read/write register */
                  // 1
-                 "LOOP_FRNG_SIZEBWNT_RLOOP: \n" RandLFSR64 "lea (%[start_addr], %%r8), %%r9 \n"
+                 "6: \n" RandLFSR64 "lea (%[start_addr], %%r8), %%r9 \n"
                  "xor %%r10, %%r10 \n"
-                 "LOOP_FRNG_SIZEBWNT_ONE1: \n" SIZEBTNT_MACRO "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_FRNG_SIZEBWNT_ONE1 \n" SIZEBTST_FENCE
+                 "7: \n" SIZEBTNT_MACRO "cmp %[accesssize], %%r10 \n"
+                 "jl 7b \n" SIZEBTST_FENCE
 
                      // 2
                      RandLFSR64 "lea (%[start_addr], %%r8), %%r9 \n"
                  "xor %%r10, %%r10 \n"
-                 "LOOP_FRNG_SIZEBWNT_ONE2: \n" SIZEBTNT_MACRO "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_FRNG_SIZEBWNT_ONE2 \n" SIZEBTST_FENCE
+                 "8: \n" SIZEBTNT_MACRO "cmp %[accesssize], %%r10 \n"
+                 "jl 8b \n" SIZEBTST_FENCE
                      // 3
                      RandLFSR64 "lea (%[start_addr], %%r8), %%r9 \n"
                  "xor %%r10, %%r10 \n"
-                 "LOOP_FRNG_SIZEBWNT_ONE3: \n" SIZEBTNT_MACRO "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_FRNG_SIZEBWNT_ONE3 \n" SIZEBTST_FENCE
+                 "9: \n" SIZEBTNT_MACRO "cmp %[accesssize], %%r10 \n"
+                 "jl 9b \n" SIZEBTST_FENCE
                      // 4
                      RandLFSR64 "lea (%[start_addr], %%r8), %%r9 \n"
                  "xor %%r10, %%r10 \n"
-                 "LOOP_FRNG_SIZEBWNT_ONE4: \n" SIZEBTNT_MACRO "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_FRNG_SIZEBWNT_ONE4 \n" SIZEBTST_FENCE
+                 "10: \n" SIZEBTNT_MACRO "cmp %[accesssize], %%r10 \n"
+                 "jl 10b \n" SIZEBTST_FENCE
 
                  "add $4, %%r11 \n"
                  "cmp %[count], %%r11\n"
-                 "jl LOOP_FRNG_SIZEBWNT_RLOOP \n"
+                 "jl 6b \n"
 
                  : [random] "=r"(rand_seed)
                  : [start_addr] "r"(start_addr), [accesssize] "r"(size), [count] "r"(count),
@@ -440,30 +440,30 @@ void sizebw_store(char *start_addr, long size, long count, long *rand_seed, long
                  "xor %%r11, %%r11 \n"
                  "movq %[start_addr], %%xmm0 \n" /* zmm0: read/write register */
                  // 1
-                 "LOOP_FRNG_SIZEBWST_RLOOP: \n" RandLFSR64 "lea (%[start_addr], %%r8), %%r9 \n"
+                 "11: \n" RandLFSR64 "lea (%[start_addr], %%r8), %%r9 \n"
                  "xor %%r10, %%r10 \n"
-                 "LOOP_FRNG_SIZEBWST_ONE1: \n" SIZEBTST_MACRO "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_FRNG_SIZEBWST_ONE1 \n" SIZEBTST_FENCE
+                 "12: \n" SIZEBTST_MACRO "cmp %[accesssize], %%r10 \n"
+                 "jl 12b \n" SIZEBTST_FENCE
 
                      // 2
                      RandLFSR64 "lea (%[start_addr], %%r8), %%r9 \n"
                  "xor %%r10, %%r10 \n"
-                 "LOOP_FRNG_SIZEBWST_ONE2: \n" SIZEBTST_MACRO "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_FRNG_SIZEBWST_ONE2 \n" SIZEBTST_FENCE
+                 "13: \n" SIZEBTST_MACRO "cmp %[accesssize], %%r10 \n"
+                 "jl 13b \n" SIZEBTST_FENCE
                      // 3
                      RandLFSR64 "lea (%[start_addr], %%r8), %%r9 \n"
                  "xor %%r10, %%r10 \n"
-                 "LOOP_FRNG_SIZEBWST_ONE3: \n" SIZEBTST_MACRO "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_FRNG_SIZEBWST_ONE3 \n" SIZEBTST_FENCE
+                 "14: \n" SIZEBTST_MACRO "cmp %[accesssize], %%r10 \n"
+                 "jl 14b \n" SIZEBTST_FENCE
                      // 4
                      RandLFSR64 "lea (%[start_addr], %%r8), %%r9 \n"
                  "xor %%r10, %%r10 \n"
-                 "LOOP_FRNG_SIZEBWST_ONE4: \n" SIZEBTST_MACRO "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_FRNG_SIZEBWST_ONE4 \n" SIZEBTST_FENCE
+                 "15: \n" SIZEBTST_MACRO "cmp %[accesssize], %%r10 \n"
+                 "jl 15b \n" SIZEBTST_FENCE
 
                  "add $4, %%r11 \n"
                  "cmp %[count], %%r11\n"
-                 "jl LOOP_FRNG_SIZEBWST_RLOOP \n"
+                 "jl 11b \n"
 
                  : [random] "=r"(rand_seed)
                  : [start_addr] "r"(start_addr), [accesssize] "r"(size), [count] "r"(count),
@@ -478,30 +478,30 @@ void sizebw_storeclwb(char *start_addr, long size, long count, long *rand_seed, 
                  "xor %%r11, %%r11 \n"
                  "movq %[start_addr], %%xmm0 \n" /* zmm0: read/write register */
                  // 1
-                 "LOOP_FRNG_SIZEBWSTFLUSH_RLOOP: \n" RandLFSR64 "lea (%[start_addr], %%r8), %%r9 \n"
+                 "16: \n" RandLFSR64 "lea (%[start_addr], %%r8), %%r9 \n"
                  "xor %%r10, %%r10 \n"
-                 "LOOP_FRNG_SIZEBWSTFLUSH_ONE1: \n" SIZEBTSTFLUSH_MACRO "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_FRNG_SIZEBWSTFLUSH_ONE1 \n" SIZEBTST_FENCE
+                 "17: \n" SIZEBTSTFLUSH_MACRO "cmp %[accesssize], %%r10 \n"
+                 "jl 17b \n" SIZEBTST_FENCE
 
                      // 2
                      RandLFSR64 "lea (%[start_addr], %%r8), %%r9 \n"
                  "xor %%r10, %%r10 \n"
-                 "LOOP_FRNG_SIZEBWSTFLUSH_ONE2: \n" SIZEBTSTFLUSH_MACRO "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_FRNG_SIZEBWSTFLUSH_ONE2 \n" SIZEBTST_FENCE
+                 "18: \n" SIZEBTSTFLUSH_MACRO "cmp %[accesssize], %%r10 \n"
+                 "jl 18b \n" SIZEBTST_FENCE
                      // 3
                      RandLFSR64 "lea (%[start_addr], %%r8), %%r9 \n"
                  "xor %%r10, %%r10 \n"
-                 "LOOP_FRNG_SIZEBWSTFLUSH_ONE3: \n" SIZEBTSTFLUSH_MACRO "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_FRNG_SIZEBWSTFLUSH_ONE3 \n" SIZEBTST_FENCE
+                 "19: \n" SIZEBTSTFLUSH_MACRO "cmp %[accesssize], %%r10 \n"
+                 "jl 19b \n" SIZEBTST_FENCE
                      // 4
                      RandLFSR64 "lea (%[start_addr], %%r8), %%r9 \n"
                  "xor %%r10, %%r10 \n"
-                 "LOOP_FRNG_SIZEBWSTFLUSH_ONE4: \n" SIZEBTSTFLUSH_MACRO "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_FRNG_SIZEBWSTFLUSH_ONE4 \n" SIZEBTST_FENCE
+                 "20: \n" SIZEBTSTFLUSH_MACRO "cmp %[accesssize], %%r10 \n"
+                 "jl 20b \n" SIZEBTST_FENCE
 
                  "add $4, %%r11 \n"
                  "cmp %[count], %%r11\n"
-                 "jl LOOP_FRNG_SIZEBWSTFLUSH_RLOOP \n"
+                 "jl 16b \n"
 
                  : [random] "=r"(rand_seed)
                  : [start_addr] "r"(start_addr), [accesssize] "r"(size), [count] "r"(count),
@@ -516,25 +516,25 @@ void stride_load(char *start_addr, long size, long skip, long delay, long count)
                  "xor %%r11, %%r11 \n" /* r11: counter */
 
                  // 1
-                 "LOOP_STRIDELOAD_OUTER: \n" /* outer (counter) loop */
+                 "21: \n" /* outer (counter) loop */
                  "lea (%[start_addr], %%r8), %%r9 \n" /* r9: access loc */
                  "xor %%r10, %%r10 \n" /* r10: accessed size */
-                 "LOOP_STRIDELOAD_INNER: \n" /* inner (access) loop, unroll 8 times */
+                 "22: \n" /* inner (access) loop, unroll 8 times */
                  SIZEBTLD_64_AVX512 /* Access: uses r10[size_accessed], r9 */
                  "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_STRIDELOAD_INNER \n" SIZEBTLD_FENCE
+                 "jl 22b \n" SIZEBTLD_FENCE
 
                  "xor %%r10, %%r10 \n"
-                 "LOOP_STRIDELOAD_DELAY: \n" /* delay <delay> cycles */
+                 "23: \n" /* delay <delay> cycles */
                  "inc %%r10 \n"
                  "cmp %[delay], %%r10 \n"
-                 "jl LOOP_STRIDELOAD_DELAY \n"
+                 "jl 23b \n"
 
                  "add %[skip], %%r8 \n"
                  "inc %%r11 \n"
                  "cmp %[count], %%r11 \n"
 
-                 "jl LOOP_STRIDELOAD_OUTER \n"
+                 "jl 21b \n"
 
                  ::[start_addr] "r"(start_addr),
                  [accesssize] "r"(size), [count] "r"(count), [skip] "r"(skip), [delay] "r"(delay)
@@ -548,25 +548,25 @@ void stride_nt(char *start_addr, long size, long skip, long delay, long count) {
                  "xor %%r11, %%r11 \n" /* r11: counter */
                  "movq %[start_addr], %%xmm0 \n" /* zmm0: read/write register */
                  // 1
-                 "LOOP_STRIDENT_OUTER: \n" /* outer (counter) loop */
+                 "24: \n" /* outer (counter) loop */
                  "lea (%[start_addr], %%r8), %%r9 \n" /* r9: access loc */
                  "xor %%r10, %%r10 \n" /* r10: accessed size */
-                 "LOOP_STRIDENT_INNER: \n" /* inner (access) loop, unroll 8 times */
+                 "25: \n" /* inner (access) loop, unroll 8 times */
                  SIZEBTNT_64_AVX512 /* Access: uses r10[size_accessed], r9 */
                  "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_STRIDENT_INNER \n" SIZEBTLD_FENCE
+                 "jl 25b \n" SIZEBTLD_FENCE
 
                  "xor %%r10, %%r10 \n"
-                 "LOOP_STRIDENT_DELAY: \n" /* delay <delay> cycles */
+                 "26: \n" /* delay <delay> cycles */
                  "inc %%r10 \n"
                  "cmp %[delay], %%r10 \n"
-                 "jl LOOP_STRIDENT_DELAY \n"
+                 "jl 26b \n"
 
                  "add %[skip], %%r8 \n"
                  "inc %%r11 \n"
                  "cmp %[count], %%r11 \n"
 
-                 "jl LOOP_STRIDENT_OUTER \n"
+                 "jl 24b \n"
 
                  ::[start_addr] "r"(start_addr),
                  [accesssize] "r"(size), [count] "r"(count), [skip] "r"(skip), [delay] "r"(delay)
@@ -580,25 +580,25 @@ void stride_store(char *start_addr, long size, long skip, long delay, long count
                  "xor %%r11, %%r11 \n" /* r11: counter */
                  "movq %[start_addr], %%xmm0 \n" /* zmm0: read/write register */
                  // 1
-                 "LOOP_STRIDEST_OUTER: \n" /* outer (counter) loop */
+                 "27: \n" /* outer (counter) loop */
                  "lea (%[start_addr], %%r8), %%r9 \n" /* r9: access loc */
                  "xor %%r10, %%r10 \n" /* r10: accessed size */
-                 "LOOP_STRIDEST_INNER: \n" /* inner (access) loop, unroll 8 times */
+                 "28: \n" /* inner (access) loop, unroll 8 times */
                  SIZEBTST_64_AVX512 /* Access: uses r10[size_accessed], r9 */
                  "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_STRIDEST_INNER \n" SIZEBTST_FENCE
+                 "jl 28b \n" SIZEBTST_FENCE
 
                  "xor %%r10, %%r10 \n"
-                 "LOOP_STRIDEST_DELAY: \n" /* delay <delay> cycles */
+                 "29: \n" /* delay <delay> cycles */
                  "inc %%r10 \n"
                  "cmp %[delay], %%r10 \n"
-                 "jl LOOP_STRIDEST_DELAY \n"
+                 "jl 29b \n"
 
                  "add %[skip], %%r8 \n"
                  "inc %%r11 \n"
                  "cmp %[count], %%r11 \n"
 
-                 "jl LOOP_STRIDEST_OUTER \n"
+                 "jl 27b \n"
 
                  ::[start_addr] "r"(start_addr),
                  [accesssize] "r"(size), [count] "r"(count), [skip] "r"(skip), [delay] "r"(delay)
@@ -612,25 +612,25 @@ void stride_storeclwb(char *start_addr, long size, long skip, long delay, long c
                  "xor %%r11, %%r11 \n" /* r11: counter */
                  "movq %[start_addr], %%xmm0 \n" /* zmm0: read/write register */
                  // 1
-                 "LOOP_STRIDESTFLUSH_OUTER: \n" /* outer (counter) loop */
+                 "30: \n" /* outer (counter) loop */
                  "lea (%[start_addr], %%r8), %%r9 \n" /* r9: access loc */
                  "xor %%r10, %%r10 \n" /* r10: accessed size */
-                 "LOOP_STRIDESTFLUSH_INNER: \n" /* inner (access) loop, unroll 8 times */
+                 "31: \n" /* inner (access) loop, unroll 8 times */
                  SIZEBTSTFLUSH_64_AVX512 /* Access: uses r10[size_accessed], r9 */
                  "cmp %[accesssize], %%r10 \n"
-                 "jl LOOP_STRIDESTFLUSH_INNER \n" SIZEBTST_FENCE
+                 "jl 31b \n" SIZEBTST_FENCE
 
                  "xor %%r10, %%r10 \n"
-                 "LOOP_STRIDESTFLUSH_DELAY: \n" /* delay <delay> cycles */
+                 "32: \n" /* delay <delay> cycles */
                  "inc %%r10 \n"
                  "cmp %[delay], %%r10 \n"
-                 "jl LOOP_STRIDESTFLUSH_DELAY \n"
+                 "jl 32b \n"
 
                  "add %[skip], %%r8 \n"
                  "inc %%r11 \n"
                  "cmp %[count], %%r11 \n"
 
-                 "jl LOOP_STRIDESTFLUSH_OUTER \n"
+                 "jl 30b \n"
 
                  ::[start_addr] "r"(start_addr),
                  [accesssize] "r"(size), [count] "r"(count), [skip] "r"(skip), [delay] "r"(delay)
@@ -645,39 +645,39 @@ void stride_storeclwb(char *start_addr, long size, long skip, long delay, long c
  */
 void stride_read_after_write(char *start_addr, long size, long skip, long delay, long count) {
     KERNEL_BEGIN
-    asm volatile("xor	%%r8, %%r8 \n" /* r8: access offset */
-                 "xor	%%r11, %%r11 \n" /* r11: counter */
-                 "movq	%[start_addr], %%xmm0 \n" /* zmm0: read/write register */
-
-                 "LOOP_RAW_OUTER: \n" /* outer (counter) loop */
-                 "lea	(%[start_addr], %%r8), %%r9 \n" /* r9: access loc */
-                 "xor	%%r10, %%r10 \n" /* r10: accessed size */
-                 "LOOP_RAW_STRIDESTCLWB_INNER: \n" /* inner (access) loop, unroll 8 times */
-                 SIZEBTSTFLUSH_64_AVX512 /* Access: uses r10[size_accessed], r9 */
-                 "cmp	%[accesssize], %%r10 \n"
-                 "jl		LOOP_RAW_STRIDESTCLWB_INNER \n"
-                 "mfence \n"
-
-                 "xor	%%r10, %%r10 \n"
-                 "LOOP_RAW_STRIDELDNT_INNER: \n" SIZEBTNT_64_AVX512 "cmp	%[accesssize], %%r10 \n"
-                 "jl		LOOP_RAW_STRIDELDNT_INNER \n"
-                 "mfence \n"
-
-                 "xor	%%r10, %%r10 \n"
-                 "LOOP_RAW_DELAY: \n" /* delay <delay> cycles */
-                 "inc	%%r10 \n"
-                 "cmp	%[delay], %%r10 \n"
-                 "jl		LOOP_RAW_DELAY \n"
-
-                 "add	%[skip], %%r8 \n"
-                 "inc	%%r11 \n"
-                 "cmp	%[count], %%r11 \n"
-
-                 "jl		LOOP_RAW_OUTER \n"
-
-                 ::[start_addr] "r"(start_addr),
-                 [accesssize] "r"(size), [count] "r"(count), [skip] "r"(skip), [delay] "r"(delay)
-                 : "%r11", "%r10", "%r9", "%r8");
+    asm volatile(
+        "xor    %%r8, %%r8\n"
+        "xor    %%r11, %%r11\n"
+        "movq   %[start_addr], %%xmm0\n"
+        "1:\n"
+        "lea    (%[start_addr], %%r8), %%r9\n"
+        "xor    %%r10, %%r10\n"
+        "2:\n"
+        "vmovdqa64  %%zmm0,  0x0(%%r9, %%r10)\n"
+        "clwb  0x0(%%r9, %%r10)\n"
+        "add $0x40, %%r10\n"
+        "cmp    %[accesssize], %%r10\n"
+        "jl     2b\n"
+        "mfence\n"
+        "xor    %%r10, %%r10\n"
+        "3:\n"
+        "vmovntdq  %%zmm0,  0x0(%%r9, %%r10)\n"
+        "add $0x40, %%r10\n"
+        "cmp    %[accesssize], %%r10\n"
+        "jl     3b\n"
+        "mfence\n"
+        "xor    %%r10, %%r10\n"
+        "4:\n"
+        "inc    %%r10\n"
+        "cmp    %[delay], %%r10\n"
+        "jl     4b\n"
+        "add    %[skip], %%r8\n"
+        "inc    %%r11\n"
+        "cmp    %[count], %%r11\n"
+        "jl     1b\n"
+        :: [start_addr] "r"(start_addr),
+           [accesssize] "r"(size), [count] "r"(count), [skip] "r"(skip), [delay] "r"(delay)
+        : "%r11", "%r10", "%r9", "%r8");
     KERNEL_END
 }
 
@@ -722,11 +722,11 @@ void chasing_storeclwb(char *start_addr, long size, long skip, long count, uint6
     KERNEL_BEGIN
     asm volatile("xor	%%r8, %%r8 \n" /* r8: access offset */
                  "xor	%%r11, %%r11 \n" /* r11: counter */
-                 "LOOP_CHASING_STCLWB_OUTER: \n" /* outer (counter) loop */
+                 "33: \n" /* outer (counter) loop */
                  "lea	(%[start_addr], %%r8), %%r9 \n" /* r9: access loc */
                  "xor	%%r10, %%r10 \n" /* r10: accessed size */
                  "xor	%%r12, %%r12 \n" /* r12: chasing index addr */
-                 "LOOP_CHASING_STCLWB_INNER: \n"
+                 "34: \n"
                  "movq	(%[cindex], %%r12, 8), %%xmm0\n"
                  "shl    $0x06, %%r12\n"
                  "vmovdqa64	%%zmm0,  0x0(%%r9, %%r12) \n"
@@ -735,7 +735,7 @@ void chasing_storeclwb(char *start_addr, long size, long skip, long count, uint6
                  "movq	%%xmm0, %%r12\n" /* Update to next chasing element */
 
                  "cmp	%[accesssize], %%r10 \n"
-                 "jl		LOOP_CHASING_STCLWB_INNER \n" SIZEBTST_FENCE
+                 "jl		34b \n" SIZEBTST_FENCE
 
                  "xor	%%r10, %%r10 \n"
 
@@ -743,7 +743,7 @@ void chasing_storeclwb(char *start_addr, long size, long skip, long count, uint6
                  "inc	%%r11 \n"
                  "cmp	%[count], %%r11 \n"
 
-                 "jl		LOOP_CHASING_STCLWB_OUTER \n"
+                 "jl		33b \n"
 
                  :
                  : [start_addr] "r"(start_addr), [accesssize] "r"(size), [count] "r"(count), [skip] "r"(skip),
@@ -756,25 +756,25 @@ void chasing_loadnt(char *start_addr, long size, long skip, long count, uint64_t
     KERNEL_BEGIN
     asm volatile("xor    %%r8, %%r8 \n" /* r8: access offset */
                  "xor    %%r11, %%r11 \n" /* r11: counter */
-                 "LOOP_CHASING_STRIDENT_OUTER: \n" /* outer (counter) loop */
+                 "35: \n" /* outer (counter) loop */
                  "lea    (%[start_addr], %%r8), %%r9 \n" /* r9: access loc */
                  "xor    %%r10, %%r10 \n" /* r10: accessed size */
                  "xor	%%r12, %%r12 \n" /* r12: chasing index addr */
-                 "LOOP_CHASING_STRIDENT_INNER: \n"
+                 "36: \n"
                  "shl    $0x06, %%r12\n"
                  "vmovntdqa 0x0(%%r9, %%r12), %%zmm0\n"
                  "movq   %%xmm0, %%r12\n" /* Update to next chasing element */
                  "add    $0x40, %%r10 \n"
 
                  "cmp    %[accesssize], %%r10 \n"
-                 "jl     LOOP_CHASING_STRIDENT_INNER \n" SIZEBTLD_FENCE
+                 "jl     36b \n" SIZEBTLD_FENCE
 
                  //"mfence \n"  /* !!!! */
                  "add    %[skip], %%r8 \n"
                  "inc    %%r11 \n"
                  "cmp    %[count], %%r11 \n"
 
-                 "jl     LOOP_CHASING_STRIDENT_OUTER \n"
+                 "jl     35b \n"
 
                  :
                  : [start_addr] "r"(start_addr), [accesssize] "r"(size), [count] "r"(count), [skip] "r"(skip),
@@ -826,14 +826,14 @@ void cacheprobe(char *start_addr, char *end_addr, long stride) {
     KERNEL_BEGIN
     asm volatile("mov %[start_addr], %%r8 \n"
                  "movq %[start_addr], %%xmm0 \n"
-                 "LOOP_CACHEPROBE: \n"
+                 "37: \n"
                  "vmovdqa64 %%zmm0, 0x0(%%r8) \n"
                  "clflush (%%r8) \n"
                  "vmovdqa64 %%zmm0, 0x40(%%r8) \n"
                  "clflush 0x40(%%r8) \n"
                  "add %[stride], %%r8 \n"
                  "cmp %[end_addr], %%r8 \n"
-                 "jl LOOP_CACHEPROBE \n"
+                 "jl 37b \n"
                  "mfence \n"
 
                  ::[start_addr] "r"(start_addr),
@@ -871,17 +871,17 @@ void seq_load(char *start_addr, char *end_addr, long size) {
     KERNEL_BEGIN
     asm volatile("mov %[start_addr], %%r9 \n"
 
-                 "LOOP_SEQLOAD1: \n"
+                 "38: \n"
                  "xor %%r8, %%r8 \n"
-                 "LOOP_SEQLOAD2: \n"
+                 "39: \n"
                  "vmovntdqa 0x0(%%r9, %%r8), %%zmm0 \n"
                  "add $0x40, %%r8 \n"
                  "cmp %[size], %%r8 \n"
-                 "jl LOOP_SEQLOAD2 \n"
+                 "jl 39b \n"
 
                  "add %[size], %%r9 \n"
                  "cmp %[end_addr], %%r9 \n"
-                 "jl LOOP_SEQLOAD1 \n"
+                 "jl 38b \n"
 
                  ::[start_addr] "r"(start_addr),
                  [end_addr] "r"(end_addr), [size] "r"(size)
@@ -894,18 +894,18 @@ void seq_store(char *start_addr, char *end_addr, long size) {
     asm volatile("mov %[start_addr], %%r9 \n"
                  "movq %[start_addr], %%xmm0 \n"
 
-                 "LOOP_SEQSTORE1: \n"
+                 "40: \n"
                  "xor %%r8, %%r8 \n"
-                 "LOOP_SEQSTORE2: \n"
+                 "41: \n"
                  "vmovdqa64  %%zmm0,  0x0(%%r9, %%r8) \n"
                  "clwb  (%%r9, %%r8) \n"
                  "add $0x40, %%r8 \n"
                  "cmp %[size], %%r8 \n"
-                 "jl LOOP_SEQSTORE2 \n"
+                 "jl 41b \n"
 
                  "add %[size], %%r9 \n"
                  "cmp %[end_addr], %%r9 \n"
-                 "jl LOOP_SEQSTORE1 \n"
+                 "jl 40b \n"
 
                  ::[start_addr] "r"(start_addr),
                  [end_addr] "r"(end_addr), [size] "r"(size)
@@ -919,18 +919,18 @@ void seq_clwb(char *start_addr, char *end_addr, long size) {
     asm volatile("mov %[start_addr], %%r9 \n"
                  "movq %[start_addr], %%xmm0 \n"
 
-                 "LOOP_SEQCLWB1: \n"
+                 "42: \n"
                  "xor %%r8, %%r8 \n"
-                 "LOOP_SEQCLWB2: \n"
+                 "43: \n"
                  "vmovdqa64  %%zmm0,  0x0(%%r9, %%r8) \n"
                  "clwb  (%%r9, %%r8) \n"
                  "add $0x40, %%r8 \n"
                  "cmp %[size], %%r8 \n"
-                 "jl LOOP_SEQCLWB2 \n"
+                 "jl 43b \n"
 
                  "add %[size], %%r9 \n"
                  "cmp %[end_addr], %%r9 \n"
-                 "jl LOOP_SEQCLWB1 \n"
+                 "jl 42b \n"
 
                  ::[start_addr] "r"(start_addr),
                  [end_addr] "r"(end_addr), [size] "r"(size)
@@ -943,17 +943,17 @@ void seq_nt(char *start_addr, char *end_addr, long size) {
     asm volatile("mov %[start_addr], %%r9 \n"
                  "movq %[start_addr], %%xmm0 \n"
 
-                 "LOOP_SEQNT1: \n"
+                 "44: \n"
                  "xor %%r8, %%r8 \n"
-                 "LOOP_SEQNT2: \n"
+                 "45: \n"
                  "vmovntdq %%zmm0, 0x0(%%r9, %%r8) \n"
                  "add $0x40, %%r8 \n"
                  "cmp %[size], %%r8 \n"
-                 "jl LOOP_SEQNT2 \n"
+                 "jl 45b \n"
 
                  "add %[size], %%r9 \n"
                  "cmp %[end_addr], %%r9 \n"
-                 "jl LOOP_SEQNT1 \n"
+                 "jl 44b \n"
 
                  ::[start_addr] "r"(start_addr),
                  [end_addr] "r"(end_addr), [size] "r"(size)

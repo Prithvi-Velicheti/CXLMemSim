@@ -9,7 +9,7 @@ endif ()
 execute_process(COMMAND uname -r OUTPUT_VARIABLE arch OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(LINUX_SOURCE /lib/modules/${arch}/build/)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 26)
 
 # Forcibly link to pthread library
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
@@ -18,7 +18,7 @@ find_package(Threads REQUIRED)
 
 add_subdirectory(lib/bpftime)
 add_subdirectory(microbench)
-#add_subdirectory(workloads)
+add_subdirectory(workloads)
 
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
 
@@ -49,7 +49,7 @@ if(TARGET cxxopts::cxxopts)
 else()
     target_link_libraries(CXLMemSim cxxopts)
 endif()
-target_link_libraries(CXLMemSim bpftime_vm bpftime-object bpftime_base_attach_impl bpftime-agent ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(CXLMemSim bpftime_vm bpftime-object bpftime_base_attach_impl bpftime-agent ${CMAKE_THREAD_LIBS_INIT} rt)
 
 add_executable(CXLMemSimRoB ${SOURCE_FILES} src/rob.cc)
 
@@ -59,7 +59,7 @@ if(TARGET cxxopts::cxxopts)
 else()
     target_link_libraries(CXLMemSimRoB cxxopts)
 endif()
-target_link_libraries(CXLMemSimRoB bpftime_vm bpftime-object bpftime_base_attach_impl bpftime-agent ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(CXLMemSimRoB bpftime_vm bpftime-object bpftime_base_attach_impl bpftime-agent ${CMAKE_THREAD_LIBS_INIT} rt)
 
 function(bpf prefix)
     add_custom_target(${prefix}_bpf ALL

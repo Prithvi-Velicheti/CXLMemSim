@@ -1,0 +1,2 @@
+CC=gcc-13 CXX=g++-13 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_DEFAULT_CMP0091=NEW
+cmake --build build --config Release

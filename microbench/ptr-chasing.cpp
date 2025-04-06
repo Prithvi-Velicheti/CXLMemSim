@@ -1,4 +1,14 @@
 #include "uarch.h"
+#include <errno.h>
+#include <stdio.h>
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <cpuid.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <sys/mman.h>
 
 int main() {
     int i;
